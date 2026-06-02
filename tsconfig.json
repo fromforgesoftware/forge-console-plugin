@@ -1,16 +1,22 @@
 {
 	"compilerOptions": {
 		"target": "ES2022",
+		"useDefineForClassFields": true,
 		"module": "ESNext",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"skipLibCheck": true,
+
+		/* Bundler mode — vite + vue-tsc resolve .vue SFCs and workspace kits. */
 		"moduleResolution": "bundler",
-		"lib": ["ES2022", "DOM"],
-		"declaration": true,
-		"declarationMap": true,
-		"outDir": "./dist",
-		"rootDir": "./src",
+		"allowImportingTsExtensions": true,
+		"isolatedModules": true,
+		"moduleDetection": "force",
+		"noEmit": true,
+		"jsx": "preserve",
+
 		"strict": true,
-		"skipLibCheck": true
+
+		"types": ["node", "vite/client"]
 	},
-	"include": ["src/**/*.ts"],
-	"exclude": ["src/**/*.test.ts"]
+	"include": ["src/**/*.ts", "src/**/*.vue", "env.d.ts"]
 }

@@ -1,6 +1,6 @@
 {
 	"name": "@fromforgesoftware/forge-console-plugin",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Contract + helpers for building forge console plugins (the Grafana app-plugin equivalent)",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -14,26 +14,46 @@
 		"./federation": {
 			"types": "./dist/build/federation.d.ts",
 			"import": "./dist/build/federation.js"
+		},
+		"./ui": {
+			"types": "./dist/ui/index.d.ts",
+			"import": "./dist/ui/index.js"
 		}
 	},
 	"files": [
 		"dist"
 	],
-	"sideEffects": false,
+	"sideEffects": [
+		"*.css"
+	],
 	"scripts": {
-		"build": "tsc -p tsconfig.json",
+		"build": "vite build && vue-tsc --emitDeclarationOnly -p tsconfig.build.json",
 		"test": "vitest run"
 	},
+	"dependencies": {
+		"@lucide/vue": "^1.17.0"
+	},
 	"peerDependencies": {
+		"@fromforgesoftware/ts-kit": "^0.1.0",
+		"@fromforgesoftware/vue-kit": "^0.1.0",
 		"vue": "^3.5.0",
 		"vue-router": "^4.0.0"
 	},
 	"devDependencies": {
+		"@fromforgesoftware/ts-kit": "^0.1.0",
+		"@fromforgesoftware/vue-kit": "^0.1.0",
+		"@tailwindcss/vite": "^4.0.0",
+		"@types/node": "^22.0.0",
+		"@vitejs/plugin-vue": "^6.0.0",
+		"@vue/test-utils": "^2.4.6",
+		"jsdom": "^28.1.0",
+		"tailwindcss": "^4.0.0",
+		"typescript": "~5.9.2",
+		"vite": "^6.0.0",
+		"vitest": "^3.0.0",
 		"vue": "^3.5.0",
 		"vue-router": "^4.0.0",
-		"typescript": "~5.9.2",
-		"vitest": "^3.0.0",
-		"@types/node": "^22.0.0"
+		"vue-tsc": "^2.2.0"
 	},
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com",

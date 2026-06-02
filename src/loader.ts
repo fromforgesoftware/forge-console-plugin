@@ -1,5 +1,5 @@
-import type { ForgeConsolePlugin } from './plugin';
-import { sortPlugins } from './registry';
+import type { ForgeConsolePlugin } from './plugin.js';
+import { sortPlugins } from './registry.js';
 
 // AppDescriptor is one entry the forge-server returns from GET /apps (sourced
 // from the runtime configmap): the app's identity, backend base, and the URL of

@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
-import type { ForgeConsolePlugin } from './plugin';
+import type { ForgeConsolePlugin } from './plugin.js';
 
 // sortPlugins orders plugins by ascending `order` (unset sorts last).
 export function sortPlugins(list: ForgeConsolePlugin[]): ForgeConsolePlugin[] {

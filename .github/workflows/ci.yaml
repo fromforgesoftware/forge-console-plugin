@@ -6,11 +6,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          # /ui depends on @fromforgesoftware/{ts,vue}-kit from GitHub Packages,
+          # which requires auth even for public packages; scope only that org.
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@fromforgesoftware'
       - run: npm install --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run build
       - run: npm test
