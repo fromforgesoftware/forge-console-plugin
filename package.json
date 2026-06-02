@@ -1,0 +1,42 @@
+{
+	"name": "@fromforgesoftware/forge-console-plugin",
+	"version": "0.1.0",
+	"description": "Contract + helpers for building forge console plugins (the Grafana app-plugin equivalent)",
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./federation": {
+			"types": "./dist/build/federation.d.ts",
+			"import": "./dist/build/federation.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"sideEffects": false,
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"test": "vitest run"
+	},
+	"peerDependencies": {
+		"vue": "^3.5.0",
+		"vue-router": "^4.0.0"
+	},
+	"devDependencies": {
+		"vue": "^3.5.0",
+		"vue-router": "^4.0.0",
+		"typescript": "~5.9.2",
+		"vitest": "^3.0.0",
+		"@types/node": "^22.0.0"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com",
+		"access": "public"
+	}
+}
