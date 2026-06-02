@@ -3,44 +3,65 @@ import { sortPlugins } from './registry.js';
 
 // AppDescriptor is one entry the forge-server returns from GET /apps (sourced
 // from the runtime configmap): the app's identity, backend base, and the URL of
-// its console plugin remote module.
+// its console plugin SystemJS module (module.js).
 export interface AppDescriptor {
 	slug: string;
 	name: string;
 	apiBase: string;
-	/** URL of the Module Federation remote entry exposing the plugin factory. */
+	/** URL of the plugin's SystemJS module (a single module.js, Grafana-style). */
 	moduleUri: string;
 }
 
-// RemoteImporter dynamically imports a remote module by URL. Injected so it can
-// be backed by Module Federation at runtime and by a fake in tests.
-export type RemoteImporter = (uri: string) => Promise<RemotePluginModule>;
+// A loaded SystemJS module namespace. The plugin module's default export is
+// either the ForgeConsolePlugin itself or a factory returning it; `plugin` is
+// also accepted as a named export for symmetry with the contract.
+export interface ConsolePluginModule {
+	default?: ForgeConsolePlugin | (() => ForgeConsolePlugin);
+	plugin?: ForgeConsolePlugin | (() => ForgeConsolePlugin);
+}
 
-// A loaded remote exposes its ForgeConsolePlugin via `plugin` or default export.
-export interface RemotePluginModule {
-	plugin?: () => ForgeConsolePlugin;
-	default?: () => ForgeConsolePlugin;
+// SystemImporter is the injectable seam: it resolves a module URL to its loaded
+// SystemJS namespace. The host passes a function backed by its CONFIGURED System
+// instance (the one whose import map registers the shared singletons — vue,
+// pinia, the kits, this contract), e.g.:
+//   const importer: SystemImporter = (uri) => System.import(uri);
+// Tests pass a fake or a real `systemjs` System instance. The mechanism is
+// SystemJS, NOT Module Federation.
+export type SystemImporter = (uri: string) => Promise<ConsolePluginModule>;
+
+// resolvePlugin unwraps a loaded module to a ForgeConsolePlugin, accepting a
+// direct plugin object or a zero-arg factory, via `default` or `plugin`.
+function resolvePlugin(mod: ConsolePluginModule): ForgeConsolePlugin | undefined {
+	const exported = mod.default ?? mod.plugin;
+	if (typeof exported === 'function') {
+		return (exported as () => ForgeConsolePlugin)();
+	}
+	if (exported && typeof exported === 'object') {
+		return exported;
+	}
+	return undefined;
 }
 
 // loadConsolePlugins turns the enabled app descriptors into registered plugins
-// by dynamically importing each remote and calling its factory. Failures are
-// isolated — a broken or unreachable remote is logged and skipped, never
-// breaking the console or the other plugins. serviceId/apiBase fall back to the
-// descriptor so the backend /apps entry is the source of truth.
+// by `System.import()`-ing each app's module.js and unwrapping its default
+// export. Failures are isolated — a broken or unreachable module is logged and
+// skipped, never breaking the console or the other plugins. serviceId/apiBase
+// fall back to the descriptor so the backend /apps entry is the source of truth.
 export async function loadConsolePlugins(
 	apps: AppDescriptor[],
-	importRemote: RemoteImporter,
+	importModule: SystemImporter,
 ): Promise<ForgeConsolePlugin[]> {
 	const loaded: ForgeConsolePlugin[] = [];
 	for (const app of apps) {
 		try {
-			const mod = await importRemote(app.moduleUri);
-			const factory = mod.plugin ?? mod.default;
-			if (typeof factory !== 'function') {
-				console.error(`forge-console: remote "${app.slug}" exposes no plugin factory`);
+			const mod = await importModule(app.moduleUri);
+			const plugin = resolvePlugin(mod);
+			if (!plugin) {
+				console.error(
+					`forge-console: module "${app.slug}" exposes no ForgeConsolePlugin (expected default export or factory)`,
+				);
 				continue;
 			}
-			const plugin = factory();
 			loaded.push({
 				...plugin,
 				serviceId: plugin.serviceId || app.slug,

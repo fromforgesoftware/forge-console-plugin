@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const dirname = resolve(fileURLToPath(import.meta.url), '..');
 
 // The package ships three entries: the framework-agnostic contract (`index`),
-// the build/federation helper, and the Vue `ui` renderers. A single Vite lib
+// the build/systemjs helper, and the Vue `ui` renderers. A single Vite lib
 // build emits all three as ESM; vue-tsc emits the matching .d.ts separately
 // (see `build` script). Heavy deps + framework + workspace kits are externalised
 // so the bundle stays thin and consumers dedupe on their own copies.
@@ -21,7 +21,7 @@ export default defineConfig({
 			// path and package.json `exports` resolve with no manifest.
 			entry: {
 				index: resolve(dirname, 'src/index.ts'),
-				'build/federation': resolve(dirname, 'src/build/federation.ts'),
+				'build/systemjs': resolve(dirname, 'src/build/systemjs.ts'),
 				'ui/index': resolve(dirname, 'src/ui/index.ts'),
 			},
 			formats: ['es'],
@@ -40,7 +40,7 @@ export default defineConfig({
 			],
 			output: {
 				globals: { vue: 'Vue' },
-				// Emit each entry at its keyed path (index.js, build/federation.js,
+				// Emit each entry at its keyed path (index.js, build/systemjs.js,
 				// ui/index.js) so package.json `exports` resolve without a manifest.
 				entryFileNames: '[name].js',
 			},

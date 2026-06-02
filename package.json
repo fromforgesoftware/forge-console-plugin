@@ -1,6 +1,6 @@
 {
 	"name": "@fromforgesoftware/forge-console-plugin",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Contract + helpers for building forge console plugins (the Grafana app-plugin equivalent)",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -11,9 +11,9 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
 		},
-		"./federation": {
-			"types": "./dist/build/federation.d.ts",
-			"import": "./dist/build/federation.js"
+		"./build": {
+			"types": "./dist/build/systemjs.d.ts",
+			"import": "./dist/build/systemjs.js"
 		},
 		"./ui": {
 			"types": "./dist/ui/index.d.ts",
@@ -47,6 +47,7 @@
 		"@vitejs/plugin-vue": "^6.0.0",
 		"@vue/test-utils": "^2.4.6",
 		"jsdom": "^28.1.0",
+		"systemjs": "^6.15.1",
 		"tailwindcss": "^4.0.0",
 		"typescript": "~5.9.2",
 		"vite": "^6.0.0",

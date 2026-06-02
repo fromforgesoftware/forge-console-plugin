@@ -8,3 +8,21 @@ declare module '*.vue' {
 	const component: DefineComponent<Record<string, unknown>, Record<string, unknown>, unknown>;
 	export default component;
 }
+
+// Minimal ambient types for the untyped `systemjs` package (used only by the
+// interop test). The Node build exports a ready System instance plus helpers.
+declare module 'systemjs' {
+	interface SystemInstance {
+		import(id: string, parentUrl?: string): Promise<Record<string, unknown>>;
+		set(id: string, module: Record<string, unknown>): Record<string, unknown>;
+		resolve(id: string, parentUrl?: string): string;
+		register(deps: string[], declare: (...args: unknown[]) => unknown): void;
+	}
+	export const System: SystemInstance;
+	export function applyImportMap(
+		loader: SystemInstance,
+		map: { imports?: Record<string, string>; scopes?: Record<string, Record<string, string>> },
+		mapBase?: string,
+	): void;
+	export function setBaseUrl(loader: SystemInstance, baseUrl: string): void;
+}

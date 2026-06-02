@@ -1,4 +1,4 @@
 export * from './plugin.js';
 export * from './registry.js';
 export * from './loader.js';
-export * from './build/federation.js';
+export * from './build/systemjs.js';

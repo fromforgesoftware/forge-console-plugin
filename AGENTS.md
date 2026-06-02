@@ -11,7 +11,8 @@ contribute an admin UI to the forge console.
 - `ForgeConsolePlugin` / `ForgeConsolePage` — the contract (`type: 'app'` today;
   `panel`/`datasource` reserved).
 - `sortPlugins` / `enabledPlugins` / `pluginRoutes` — registry helpers.
-- `/federation` → `consolePluginRemote()` — Vite Module Federation remote preset.
+- `/build` → `consolePluginModule()` — Vite SystemJS library preset (emits one
+  `module.js`, externalises shared singletons). Host loads via `System.import`.
 
 ## Stack
 TypeScript 5.9 · vue + vue-router (peers, types only). No runtime ts-kit/vue-kit import.

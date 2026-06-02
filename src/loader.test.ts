@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
-import { loadConsolePlugins, type AppDescriptor, type RemoteImporter } from './loader';
+import { loadConsolePlugins, type AppDescriptor, type SystemImporter } from './loader';
 import type { ForgeConsolePlugin } from './plugin';
 
-const desc = (slug: string, order?: number): AppDescriptor => ({
+const desc = (slug: string): AppDescriptor => ({
 	slug,
 	name: slug,
 	apiBase: `http://${slug}`,
-	moduleUri: `http://${slug}/console/remoteEntry.js`,
+	moduleUri: `http://${slug}/console/module.js`,
 });
 
 const fakePlugin = (slug: string, order?: number): ForgeConsolePlugin => ({
@@ -20,23 +20,37 @@ const fakePlugin = (slug: string, order?: number): ForgeConsolePlugin => ({
 });
 
 describe('loadConsolePlugins', () => {
-	it('imports each remote, applies descriptor fallbacks, and sorts by order', async () => {
-		const importRemote: RemoteImporter = vi.fn(async (uri) => {
-			if (uri.includes('aegis')) return { plugin: () => fakePlugin('aegis', 2) };
-			return { default: () => fakePlugin('talos', 1) };
+	it('System.imports each module, applies descriptor fallbacks, and sorts by order', async () => {
+		// SystemJS namespaces: aegis exports a factory (default), talos a plain
+		// object (default) — both unwrap to a ForgeConsolePlugin.
+		const importModule: SystemImporter = vi.fn(async (uri) => {
+			if (uri.includes('aegis')) return { default: () => fakePlugin('aegis', 2) };
+			return { default: fakePlugin('talos', 1) };
 		});
-		const out = await loadConsolePlugins([desc('aegis'), desc('talos')], importRemote);
+		const out = await loadConsolePlugins([desc('aegis'), desc('talos')], importModule);
 		expect(out.map((p) => p.serviceId)).toEqual(['talos', 'aegis']); // sorted by order
 		expect(out[1].apiBase).toBe('http://aegis'); // descriptor fallback applied
 		expect(out[1].type).toBe('app');
 	});
 
-	it('isolates a failing remote without dropping the others', async () => {
-		const importRemote: RemoteImporter = async (uri) => {
+	it('accepts a `plugin` named export as well as default', async () => {
+		const importModule: SystemImporter = async () => ({ plugin: () => fakePlugin('x', 1) });
+		const out = await loadConsolePlugins([desc('x')], importModule);
+		expect(out[0].serviceId).toBe('x');
+	});
+
+	it('isolates a failing module without dropping the others', async () => {
+		const importModule: SystemImporter = async (uri) => {
 			if (uri.includes('broken')) throw new Error('network');
-			return { plugin: () => fakePlugin('ok', 1) };
+			return { default: () => fakePlugin('ok', 1) };
 		};
-		const out = await loadConsolePlugins([desc('broken'), desc('ok')], importRemote);
+		const out = await loadConsolePlugins([desc('broken'), desc('ok')], importModule);
 		expect(out.map((p) => p.serviceId)).toEqual(['ok']);
+	});
+
+	it('skips a module that exposes no plugin', async () => {
+		const importModule: SystemImporter = async () => ({});
+		const out = await loadConsolePlugins([desc('empty')], importModule);
+		expect(out).toEqual([]);
 	});
 });
