@@ -1,6 +1,6 @@
 {
 	"name": "@fromforgesoftware/forge-console-plugin",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"description": "Contract + helpers for building forge console plugins (the Grafana app-plugin equivalent)",
 	"type": "module",
 	"main": "./dist/index.js",
